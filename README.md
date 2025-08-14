@@ -18,11 +18,11 @@
 | `echo [texte]`               | Affiche du texte                                     |
 | `cd [chemin]`                | Change le répertoire courant                         |
 | `pwd`                        | Affiche le répertoire courant                        |
-| `ls [-l] [-a] [-F] [chemin]` | Liste fichiers et dossiers                           |
+| `ls [-l] [-a] [-F]`          | Liste fichiers et dossiers                           |
 | `cat <fichier>`              | Affiche le contenu d’un fichier                      |
-| `cp <source> <cible>`        | Copie un fichier ou dossier                          |
-| `mv <source> <cible>`        | Déplace ou renomme un fichier ou dossier             |
-| `rm [-r] <chemin>`           | Supprime un fichier ou dossier                       |
+| `cp <source> <destination>`  | Copie un fichier ou dossier                          |
+| `mv <source> <destination>`  | Déplace ou renomme un fichier ou dossier             |
+| `rm [-r] <fichier/dossier>`  | Supprime un fichier ou dossier                       |
 | `mkdir <dossier>`            | Crée un nouveau dossier                              |
 | `clear`                      | Efface l’écran                                       |
 | `history`                    | Affiche l’historique des commandes                   |
