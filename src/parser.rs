@@ -1,4 +1,5 @@
-/// parse_args : sépare une ligne en arguments en gérant les guillemets doubles
+
+// return args vec
 pub fn parse_args(line: &str) -> Vec<String> {
     let mut args = Vec::new();
     let mut buf = String::new();
@@ -6,6 +7,7 @@ pub fn parse_args(line: &str) -> Vec<String> {
 
     for ch in line.trim().chars() {
         match ch {
+            // Handle quotes to allow spaces within quoted strings
             '"' => in_quotes = !in_quotes,
             ' ' | '\t' if !in_quotes => {
                 if !buf.is_empty() {
@@ -13,6 +15,7 @@ pub fn parse_args(line: &str) -> Vec<String> {
                     buf.clear();
                 }
             }
+            // Handle newlines and carriage returns outside of quotes
             '\n' | '\r' if !in_quotes => {
                 if !buf.is_empty() {
                     args.push(buf.clone());

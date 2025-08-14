@@ -18,7 +18,7 @@ pub fn cmd_cd(args: &[String]) {
                 path.push(&target);
             }
             Err(e) => {
-                eprintln!("cd: erreur en obtenant le répertoire courant: {}", e);
+                eprintln!(" Failed to reach target directory : {}", e);
                 return;
             }
         }
