@@ -74,7 +74,7 @@ exit
 Affiche du texte sur la sortie standard.
 
 ```bash
-echo Hello World
+echo "Hello World"
 ```
 
 ### `cd [chemin]`
@@ -82,7 +82,6 @@ echo Hello World
 Change le répertoire courant.
 
 * `cd ..` : remonte d’un dossier
-* `cd ~` : va dans le dossier utilisateur
 
 ### `pwd`
 
@@ -92,7 +91,7 @@ Affiche le chemin du répertoire courant.
 pwd
 ```
 
-### `ls [-l] [-a] [-F] [chemin]`
+### `ls [-l] [-a] [-F]`
 
 Liste les fichiers et dossiers.
 
@@ -101,8 +100,12 @@ Liste les fichiers et dossiers.
 * `-F` : ajoute un symbole pour le type de fichier (`/` pour dossiers, `*` pour exécutables)
 
 ```bash
-ls -laF /home/user
+ls -laF
 ```
+
+* **Dossiers** : bleu
+* **Fichiers exécutables** : vert
+* **Fichiers ordinaires** : blanc
 
 ### `cat <fichier>`
 
@@ -112,32 +115,27 @@ Affiche le contenu d’un fichier texte.
 cat fichier.txt
 ```
 
-### `cp <source> <cible>`
+### `cp <fichier> <destination>`
 
-Copie un fichier ou dossier.
+Copie un fichier.
 
-* Exemple fichier :
+* Exemple :
 
 ```bash
-cp fichier.txt copie.txt
+cp fichier.txt ./destination
 ```
 
-* Exemple dossier :
+
+### `mv <source> <destination>`
+
+Déplace un fichier ou dossier.
 
 ```bash
-cp -r dossier1 dossier2
-```
-
-### `mv <source> <cible>`
-
-Déplace ou renomme un fichier ou dossier.
-
-```bash
-mv ancien.txt nouveau.txt
+mv fichier.txt ./destination
 mv dossier1 dossier2
 ```
 
-### `rm [-r] <chemin>`
+### `rm [-r] <fichier/dossier>`
 
 Supprime un fichier ou dossier.
 
@@ -166,19 +164,10 @@ clear
 
 ### `history`
 
-Affiche l’historique des commandes entrées dans le shell.
+Affiche l’historique des commandes valides entrées dans le shell depuis son lancement.
 
 ```bash
 history
 ```
-
----
-
-## Couleurs et prompt
-
-* **Dossiers** : bleu
-* **Fichiers exécutables** : vert
-* **Fichiers ordinaires** : blanc
-* Prompt : `username@hostname:cwd$`
 
 ---
