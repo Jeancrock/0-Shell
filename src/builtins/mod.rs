@@ -1,3 +1,5 @@
+use clear::cmd_clear;
+
 pub mod cat;
 pub mod cd;
 pub mod cp;
@@ -6,9 +8,10 @@ pub mod ls;
 pub mod mkdir;
 pub mod mv;
 pub mod pwd;
+pub mod clear;
 pub mod rm;
 
-pub fn dispatch(args: &[String]) -> Result<bool, String> {
+pub fn dispatch(args: &[String], history: &Vec<String>) -> Result<bool, String> {
     match args[0].as_str() {
         "help" => {
             println!(
@@ -59,6 +62,7 @@ pub fn dispatch(args: &[String]) -> Result<bool, String> {
             );
             Ok(true)
         }
+
         "exit" => Ok(false),
         "echo" => {
             let _ = echo::cmd_echo(args);
@@ -96,6 +100,15 @@ pub fn dispatch(args: &[String]) -> Result<bool, String> {
             let _ = mkdir::cmd_mkdir(args);
             Ok(true)
         }
+        "history" => {
+            println!("{:?}", history);
+            Ok(true)
+        }
+
+        "clear" => {
+            cmd_clear()?;
+            Ok(true)
+        },
         _ => Err(format!("Command '{}' not found", args[0])),
     }
 }

@@ -1,11 +1,10 @@
 use std::{env, path::PathBuf};
 
 pub fn cmd_cd(args: &[String]) {
-    let target = if args.is_empty() {
-        env::var("HOME").unwrap_or_else(|_| "/".to_string())
-    } else {
-        args[0].clone()
-    };
+    let target = args.get(1)
+    .cloned()
+    .unwrap_or_else(|| env::var("HOME").unwrap_or_else(|_| "/".to_string()));
+
 
     let mut path = PathBuf::new();
 

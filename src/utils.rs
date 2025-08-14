@@ -1,7 +1,8 @@
+
 use std::fs::{self, Metadata, ReadDir};
 use std::io;
-use std::os::unix::fs::MetadataExt;
-use std::path::{Path, PathBuf};
+use std::os::unix::fs::{MetadataExt, PermissionsExt};
+use std::path::Path;
 
 pub fn read_and_collect_dir(dir: &Path) -> io::Result<Vec<(String, Metadata)>> {
     let rd: ReadDir = fs::read_dir(dir)?;
@@ -15,35 +16,52 @@ pub fn read_and_collect_dir(dir: &Path) -> io::Result<Vec<(String, Metadata)>> {
     Ok(out)
 }
 
-pub fn print_long_line(path: PathBuf, md: &Metadata, classify: bool) -> Result<(), String> {
-    let mode = md.mode();
-    let perms = mode_to_rwx(mode);
-    let size = md.size();
-    let mtime = md.mtime();
-    let name = format_name(path.file_name().unwrap().to_string_lossy().as_ref(), md, classify);
+pub fn format_name(name: &str, meta: &Metadata, classify: bool) -> String {
+    let mut s = name.to_string();
 
-    println!(
-        "{} {} {:>8} {} {}",
-        perms, md.nlink(), size, mtime, name
-    );
-    Ok(())
-}
-
-pub fn format_name(name: &str, md: &Metadata, classify: bool) -> String {
-    let mut n = name.to_string();
-    if classify {
-        if md.is_dir() { n.push('/'); }
-        else if (md.mode() & 0o111) != 0 { n.push('*'); }
-        else if md.file_type().is_symlink() { n.push('@'); }
+    if meta.is_dir() {
+        s = format!("\x1b[34m{}\x1b[0m", s); // bleu pour dossiers
+        if classify {
+            s.push('/');
+        }
+    } else if meta.permissions().mode() & 0o111 != 0 {
+        s = format!("\x1b[32m{}\x1b[0m", s); // vert pour exécutables
+        if classify {
+            s.push('*');
+        }
+    } else if classify && meta.is_file() {
+        s.push(' ');
     }
-    n
+
+    s
 }
 
-pub fn mode_to_rwx(mode: u32) -> String {
-    let map = [
-        (0o400, 'r'), (0o200, 'w'), (0o100, 'x'),
-        (0o040, 'r'), (0o020, 'w'), (0o010, 'x'),
-        (0o004, 'r'), (0o002, 'w'), (0o001, 'x'),
+pub fn format_permissions(md: &Metadata) -> String {
+    let mode = md.mode();
+    let file_type = if md.is_dir() {
+        'd'
+    } else if md.file_type().is_symlink() {
+        'l'
+    } else {
+        '-'
+    };
+
+    let perms_map = [
+        (0o400, 'r'),
+        (0o200, 'w'),
+        (0o100, 'x'),
+        (0o040, 'r'),
+        (0o020, 'w'),
+        (0o010, 'x'),
+        (0o004, 'r'),
+        (0o002, 'w'),
+        (0o001, 'x'),
     ];
-    map.iter().map(|(bit, ch)| if (mode & bit) != 0 { *ch } else { '-' }).collect()
+
+    let perms: String = perms_map
+        .iter()
+        .map(|(bit, ch)| if (mode & bit) != 0 { *ch } else { '-' })
+        .collect();
+
+    format!("{}{}", file_type, perms)
 }

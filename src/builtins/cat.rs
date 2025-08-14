@@ -6,7 +6,7 @@ pub fn cmd_cat(args: &[String]) -> Result<(), String> {
     }
     for file in &args[1..] {
         match fs::read_to_string(file) {
-            Ok(content) => print!("{}", content),
+            Ok(content) => println!("{}", content),
             Err(e) => return Err(format!("cat: {}: {}", file, e)),
         }
     }
