@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install.sh pour 0-Shell
-# Ce script installe Rust, clone le dépôt et compile le shell
+# Ce script installe Rust, compile le shell
 
 set -e
 
@@ -26,4 +26,3 @@ echo "=== Compilation du projet ==="
 cargo build --release
 
 echo "=== Installation terminée ==="
-echo "Pour lancer le shell : ./target/release/0-shell"
