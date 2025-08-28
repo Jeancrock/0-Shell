@@ -5,16 +5,54 @@ pub fn dispatch(args: &[String], history: &Vec<String>) -> Result<bool, String> 
         "help" => {
             println!(
                 r#"Usage:
-    exit
-    echo [text]
-    cd [path]
-    pwd
-    ls [-a] [-F] [-l] [-r] [-R] [path]
-    cat <file>
-    cp <src> <dst>
-    rm [-r] <path>
-    mv <src> <dst>
-    mkdir <dir>"#
+    Exit:
+    $exit
+
+    Display a message:
+    $echo "[text]"
+
+    Choose Directory:
+    $cd [path]
+
+    Clear the terminal:
+    $clear
+
+    Print working directory:
+    $pwd
+
+    List directory contents:
+    $ls [-a] [-F] [-l] [-r] [-R] [path]
+
+    -a : Include hidden files
+    -F : Append indicator (one of */=>@|) to entries
+    -l : Use a long listing format
+    -r : Reverse order while sorting
+    -R : List subdirectories recursively
+
+    Display file contents:
+    $cat [path/file]
+
+    Copy files and directories:
+    $cp [dir or file to copy] [path of the destination]
+
+    Remove files or directories:
+    $rm [-r] [path/file or dir]
+
+    -r : Remove directories and their contents recursively
+
+    Move files and directories:
+    $mv [dir or file to move] [path of the destination]
+
+    Create directory(ies):
+    $mkdir [-p] [path/dir]
+
+    -p : Create multiple directories
+
+    Show command history:
+    $history
+
+    Create an empty file or update the access and modification times of a file:
+    $touch [path/file]"#
             );
             Ok(true)
         }
