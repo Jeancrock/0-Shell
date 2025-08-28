@@ -1,10 +1,10 @@
-use std::{env, path::PathBuf};
+use std::env;
+use std::path::PathBuf;
 
 pub fn cmd_cd(args: &[String]) {
     let target = args.get(1)
-    .cloned()
-    .unwrap_or_else(|| env::var("HOME").unwrap_or_else(|_| "/".to_string()));
-
+        .cloned()
+        .unwrap_or_else(|| env::var("HOME").unwrap_or_else(|_| "/".to_string()));
 
     let mut path = PathBuf::new();
 
@@ -17,7 +17,7 @@ pub fn cmd_cd(args: &[String]) {
                 path.push(&target);
             }
             Err(e) => {
-                eprintln!(" Failed to reach target directory : {}", e);
+                eprintln!("Failed to reach target directory: {}", e);
                 return;
             }
         }

@@ -22,7 +22,18 @@ cargo add whoami
 cargo add dirs
 cargo add chrono
 
+echo ""
+echo "=== Dépendances Cargo installées==="
+echo ""
+
+echo ""
 echo "=== Compilation du projet ==="
+echo ""
 cargo build --release
 
+echo ""
+echo "=== Projet Compilé==="
+echo ""
+echo ""
 echo "=== Installation terminée ==="
+echo ""

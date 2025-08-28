@@ -1,15 +1,19 @@
 use chrono::{DateTime, Local};
 use std::{fs, os::unix::fs::MetadataExt, path::Path};
+use whoami::fallible;
 
 use crate::utils;
 
 #[derive(Default)]
 struct LsFlags {
-    long: bool,
-    all: bool,
-    classify: bool,
+    long: bool,      // <- option -l
+    all: bool,       // <- option -a
+    classify: bool,  // <- option -F
+    recursive: bool, // <- option -R
+    reverse: bool,   // <- option -r
 }
 
+/// Commande `ls`
 pub fn cmd_ls(args: &[String]) -> Result<(), String> {
     let mut flags = LsFlags::default();
     let mut paths = Vec::new();
@@ -22,6 +26,8 @@ pub fn cmd_ls(args: &[String]) -> Result<(), String> {
                     'l' => flags.long = true,
                     'a' => flags.all = true,
                     'F' => flags.classify = true,
+                    'R' => flags.recursive = true,
+                    'r' => flags.reverse = true,
                     _ => return Err(format!("ls: invalid option -- '{}'", ch)),
                 }
             }
@@ -36,76 +42,128 @@ pub fn cmd_ls(args: &[String]) -> Result<(), String> {
 
     for p in paths {
         let path = Path::new(&p);
-        let mut entries = utils::read_and_collect_dir(path)
-            .map_err(|e| format!("ls: cannot access '{}': {}", p, e))?;
+        // On capture l'erreur principale ici, mais on continue avec les autres chemins
+        if let Err(e) = ls_directory(path, &flags) {
+            eprintln!("{}", e);
+        }
+    }
 
-        // Ajouter '.' et '..' si -a
-        if flags.all {
-            if let Ok(meta_dot) = fs::metadata(path) {
-                entries.insert(0, (".".to_string(), meta_dot));
-            }
-            if let Ok(meta_dotdot) = fs::metadata(path.join("..")) {
-                entries.insert(1, ("..".to_string(), meta_dotdot));
-            }
+    Ok(())
+}
+
+/// Fonction qui liste un répertoire (et descend si -R est activé)
+fn ls_directory(path: &Path, flags: &LsFlags) -> Result<(), String> {
+    let mut entries = match utils::read_and_collect_dir(path) {
+        Ok(e) => e,
+        Err(e) => return Err(format!("ls: cannot access '{}': {}", path.display(), e)),
+    };
+
+    // Ajouter '.' et '..' si -a
+    if flags.all {
+        if let Ok(meta_dot) = fs::metadata(path) {
+            entries.insert(0, (".".to_string(), meta_dot));
+        }
+        if let Ok(meta_dotdot) = fs::metadata(path.join("..")) {
+            entries.insert(1, ("..".to_string(), meta_dotdot));
+        }
+    }
+
+    // Tri alphabétique en ignorant le '.' initial pour fichiers cachés
+    entries.sort_by(|a, b| {
+        fn first_alnum_index(s: &str) -> usize {
+            s.char_indices()
+                .find(|(_, c)| c.is_alphanumeric())
+                .map(|(i, _)| i)
+                .unwrap_or(0)
         }
 
-        // Tri alphabétique en ignorant le '.' initial pour fichiers cachés
-        entries.sort_by(|a, b| {
-            let a_name = if a.0.starts_with('.') {
-                &a.0[1..]
-            } else {
-                &a.0
-            };
-            let b_name = if b.0.starts_with('.') {
-                &b.0[1..]
-            } else {
-                &b.0
-            };
-            a_name.to_lowercase().cmp(&b_name.to_lowercase())
-        });
+        let a_start = first_alnum_index(&a.0);
+        let b_start = first_alnum_index(&b.0);
 
-        if flags.long {
-            // Affichage total comme ls -l
-            let total_blocks: u64 = entries
-                .iter()
-                .filter(|(name, _)| flags.all || !name.starts_with('.'))
-                .map(|(_, md)| (md.blocks() * 512 + 1023) / 1024) // en Kio
-                .sum();
-            println!("total {}", total_blocks);
+        a.0[a_start..]
+            .to_lowercase()
+            .cmp(&b.0[b_start..].to_lowercase())
+    });
 
-            for (name, meta) in &entries {
-                if !flags.all && name.starts_with('.') {
+    // Inversion si -r
+    if flags.reverse {
+        entries.reverse();
+    }
+
+    // Mode long (-l)
+    if flags.long {
+        let total_blocks: u64 = entries
+            .iter()
+            .filter(|(name, _)| flags.all || !name.starts_with('.'))
+            .map(|(_, md)| (md.blocks() * 512 + 1023) / 1024) // en Kio
+            .sum();
+        println!("total {}", total_blocks);
+
+        let max_digits_nlink = entries
+            .iter()
+            .map(|(_, meta)| meta.nlink())
+            .max()
+            .unwrap_or(0)
+            .to_string()
+            .len();
+
+        let max_digits_size = entries
+            .iter()
+            .map(|(_, meta)| meta.len())
+            .max()
+            .unwrap_or(0)
+            .to_string()
+            .len();
+
+        for (name, meta) in &entries {
+            if !flags.all && name.starts_with('.') {
+                continue;
+            }
+
+            let permissions = utils::format_permissions(&meta);
+            let nlink = meta.nlink();
+            let size = meta.len();
+            let mtime: DateTime<Local> = DateTime::from(meta.modified().unwrap());
+            let formatted_date = mtime.format("%b  %e %H:%M").to_string();
+
+            println!(
+                "{} {:>max_digits_nlink$} {:<8}{:<8}{:>max_digits_size$} {} {}",
+                permissions,
+                nlink,
+                whoami::username(),
+                fallible::hostname().unwrap_or_else(|_| "unknown".to_string()),
+                size,
+                formatted_date,
+                utils::format_name(name, meta, flags.classify),
+            );
+        }
+    } else {
+        let mut line = String::new();
+        for (name, meta) in &entries {
+            if !flags.all && name.starts_with('.') {
+                continue;
+            }
+            let formatted = utils::format_name(name, meta, flags.classify);
+            line.push_str(&formatted);
+            line.push(' ');
+        }
+        println!("{}", line.trim_end());
+    }
+
+    // Si -R : parcourir récursivement les sous-dossiers
+    if flags.recursive {
+        for (name, meta) in &entries {
+            if !flags.all && name.starts_with('.') {
+                continue;
+            }
+            if meta.is_dir() && name != "." && name != ".." {
+                println!();
+                // ⚠️ Capture l'erreur pour continuer même si le dossier n'est pas accessible
+                if let Err(e) = ls_directory(&path.join(name), flags) {
+                    eprintln!("{}", e); // affiche l’erreur mais ne quitte pas
                     continue;
                 }
-
-                let permissions = utils::format_permissions(&meta);
-                let nlink = meta.nlink();
-                let size = meta.len();
-                let mtime: DateTime<Local> = DateTime::from(meta.modified().unwrap());
-                let formatted_date = mtime.format("%b %e %H:%M").to_string();
-
-                println!(
-                    "{} {:>2} {:<8} {:<8} {:>6} {} {}",
-                    permissions,
-                    nlink,
-                    whoami::username(),
-                    whoami::username(),
-                    size,
-                    formatted_date,
-                    utils::format_name(name, meta, flags.classify)
-                );
             }
-        } else {
-            let mut line = String::new();
-            for (name, meta) in &entries {
-                if !flags.all && name.starts_with('.') {
-                    continue;
-                }
-                let formatted = utils::format_name(name, meta, flags.classify);
-                line.push_str(&formatted);
-                line.push(' ');
-            }
-            println!("{}", line.trim_end());
         }
     }
 

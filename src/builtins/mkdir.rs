@@ -1,11 +1,29 @@
 use std::fs;
+use std::io;
+use std::path::Path;
 
-pub fn cmd_mkdir(args: &[String]) -> Result<(), String> {
+pub fn cmd_mkdir(args: &[String]) -> io::Result<()> {
     if args.len() < 2 {
-        return Err("mkdir: missing operand".to_string());
+        eprintln!("Usage: mkdir [-p] <folder1> [folder2 ...]");
+        return Ok(());
     }
-    for dir in &args[1..] {
-        fs::create_dir(dir).map_err(|e| format!("mkdir: {}: {}", dir, e))?;
+
+    let mut start = 1;
+    let recursive = if args[1] == "-p" {
+        start = 2;
+        true
+    } else {
+        false
+    };
+
+    for folder in &args[start..] {
+        let path = Path::new(folder);
+        if recursive {
+            fs::create_dir_all(path)?; // crée tous les parents nécessaires
+        } else {
+            fs::create_dir(path)?; // crée uniquement le dossier direct
+        }
     }
+
     Ok(())
 }
