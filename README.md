@@ -1,173 +1,95 @@
 # 0-Shell
 
-0-Shell est un **shell minimaliste écrit en Rust**, offrant les commandes de base (`ls`, `cd`, `pwd`, `echo`, `cat`, `cp`, `mv`, `rm`, `mkdir`, `clear`) avec un **prompt personnalisé** et un **historique des commandes**.
+0-Shell est un **shell minimaliste écrit en Rust**, offrant les commandes de base ainsi que la gestion des **jobs en arrière-plan**, un **prompt personnalisé**, et un **historique des commandes**.
 
 ---
 
-## Fonctionnalités
+## Fonctionnalités principales
 
 * Prompt dynamique : `username@hostname:cwd$`
 * Historique des commandes
 * Couleurs ANSI pour différencier dossiers, fichiers et exécutables
 * Commandes intégrées :
 
-| Commande                     | Description                                          |
-| ---------------------------- | ---------------------------------------------------- |
-| `help`                       | Affiche l’aide et la liste des commandes disponibles |
-| `exit`                       | Quitte le shell                                      |
-| `echo [texte]`               | Affiche du texte                                     |
-| `cd [chemin]`                | Change le répertoire courant                         |
-| `pwd`                        | Affiche le répertoire courant                        |
-| `ls [-l] [-a] [-F]`          | Liste fichiers et dossiers                           |
-| `cat <fichier>`              | Affiche le contenu d’un fichier                      |
-| `cp <source> <destination>`  | Copie un fichier ou dossier                          |
-| `mv <source> <destination>`  | Déplace ou renomme un fichier ou dossier             |
-| `rm [-r] <fichier/dossier>`  | Supprime un fichier ou dossier                       |
-| `mkdir <dossier>`            | Crée un nouveau dossier                              |
-| `clear`                      | Efface l’écran                                       |
-| `history`                    | Affiche l’historique des commandes                   |
-
+| Commande                         | Description                                          |
+| -------------------------------- | ---------------------------------------------------- |
+| `help`                           | Affiche l’aide et la liste des commandes disponibles |
+| `exit`                           | Quitte le shell                                      |
+| `echo [texte][[>/>>] [fichier]]` | Affiche du texte                                     |
+| `cd [chemin]`                    | Change le répertoire courant                         |
+| `pwd`                            | Affiche le répertoire courant                        |
+| `ls [-a] [-F] [-l] [-r] [-R]`    | Liste fichiers et dossiers                           |
+| `cat <fichier>`                  | Affiche le contenu d’un fichier                      |
+| `cp <source> <destination>`      | Copie un fichier ou dossier                          |
+| `mv <source> <destination>`      | Déplace ou renomme un fichier ou dossier             |
+| `rm [-r] <fichier/dossier>`      | Supprime un fichier ou dossier                       |
+| `mkdir [-p] <dossier>`           | Crée un nouveau dossier                              |
+| `clear`                          | Efface l’écran                                       |
+| `history`                        | Affiche l’historique des commandes                   |
 ---
 
 ## Installation
 
-1. Installer Rust : [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
-2. Cloner le dépôt :
+`./install.sh`
 
-   ```bash
-   git clone https://github.com/votre-utilisateur/0-shell.git
-   cd 0-shell
-   ```
-3. Compiler le shell :
+## Prompt
 
-   ```bash
-   cargo build --release
-   ```
-4. Lancer le shell :
+Le prompt est dynamique et affiché sous la forme :
 
-   ```bash
-   ./target/release/0-shell
-   ```
+```
+username@hostname:cwd$
+```
+
+* `username` : nom de l’utilisateur courant
+* `hostname` : nom de la machine
+* `cwd` : répertoire courant (le home est remplacé par `~`)
+* Couleurs ANSI :
+
+  * Bleu → dossiers
+  * Vert → fichiers exécutables
+  * Blanc → fichiers ordinaires
 
 ---
 
-## Usage et options des commandes
+## Commandes détaillées
 
-### `help`
+### Commandes de navigation et fichiers
 
-Affiche la liste des commandes et leur description.
+* **`cd [dossier présent dans le répertoire courant]`** : change le répertoire courant
+* **`cd ..`** remonte d’un dossier
+* **`cd [chemin absolu]`**. Exemple : **`cd /home/student`**
 
-```bash
-help
-```
+* **`pwd`** : affiche le chemin du répertoire courant
 
-### `exit`
+* **`ls [-l] [-a] [-F]`** : liste fichiers et dossiers
 
-Quitte le shell.
+  * `ls -a` : inclut les fichiers cachés
+  * `ls -F` : ajoute un symbole pour le type (`/` pour dossiers, `*` pour exécutables)
+  * `ls -l` : affichage détaillé (permissions, propriétaire, taille, date)
+  * `ls -r` : inverse l'ordre d'affichage
+  * `ls -R` : inclut le contenu des sous-dossiers de façon récursive
+  * 
 
-```bash
-exit
-```
+* **`cat <fichier>`** : affiche le contenu d’un fichier
 
-### `echo [texte]`
+* **`cp <source> <destination>`** : copie un fichier ou dossier
 
-Affiche du texte sur la sortie standard.
+* **`mv <source> <destination>`** : déplace ou renomme un fichier ou dossier
 
-```bash
-echo "Hello World"
-```
+* **`rm [-r] <fichier/dossier>`** : supprime un fichier ou dossier
 
-### `cd [chemin]`
+  * `rm -r` pour suppression récursive de dossiers
 
-Change le répertoire courant.
+* **`mkdir <dossier>`** : crée un nouveau dossier
+  * `mkdir -p <dossier1> <dossier2>` : créé plusieurs dossiers
 
-* `cd ..` : remonte d’un dossier
+### Commandes utilitaires
 
-### `pwd`
+* **`echo [texte]`** : affiche du texte
+  * `echo [texte] > <chemin/fichier>` : ecrase le texte du fichier avec le texte de la commande
+  * `echo [texte] >> <chemin/fichier>` : ajoute le texte de la commande dans le fichier
 
-Affiche le chemin du répertoire courant.
-
-```bash
-pwd
-```
-
-### `ls [-l] [-a] [-F]`
-
-Liste les fichiers et dossiers.
-
-* `-l` : affichage détaillé (permissions, propriétaire, taille, date)
-* `-a` : affiche les fichiers cachés
-* `-F` : ajoute un symbole pour le type de fichier (`/` pour dossiers, `*` pour exécutables)
-
-```bash
-ls -laF
-```
-
-* **Dossiers** : bleu
-* **Fichiers exécutables** : vert
-* **Fichiers ordinaires** : blanc
-
-### `cat <fichier>`
-
-Affiche le contenu d’un fichier texte.
-
-```bash
-cat fichier.txt
-```
-
-### `cp <fichier> <destination>`
-
-Copie un fichier.
-
-* Exemple :
-
-```bash
-cp fichier.txt ./destination
-```
-
-
-### `mv <source> <destination>`
-
-Déplace un fichier ou dossier.
-
-```bash
-mv fichier.txt ./destination
-mv dossier1 dossier2
-```
-
-### `rm [-r] <fichier/dossier>`
-
-Supprime un fichier ou dossier.
-
-* `-r` : suppression récursive pour dossiers
-
-```bash
-rm fichier.txt
-rm -r dossier
-```
-
-### `mkdir <dossier>`
-
-Crée un nouveau dossier.
-
-```bash
-mkdir mon_dossier
-```
-
-### `clear`
-
-Efface l’écran.
-
-```bash
-clear
-```
-
-### `history`
-
-Affiche l’historique des commandes valides entrées dans le shell depuis son lancement.
-
-```bash
-history
-```
-
----
+* **`clear`** : efface l’écran
+* **`history`** : affiche l’historique des commandes valides
+* **`help`** : affiche l’aide et la liste des commandes
+* **`exit`** : quitte le shell
