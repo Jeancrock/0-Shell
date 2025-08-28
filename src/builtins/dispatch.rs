@@ -1,15 +1,4 @@
-use crate::builtins::cat;
-use crate::builtins::cd;
-use crate::builtins::clear;
-use crate::builtins::cp;
-use crate::builtins::echo;
-use crate::builtins::ls;
-use crate::builtins::mkdir;
-use crate::builtins::mv;
-use crate::builtins::pwd;
-use crate::builtins::rm;
-use crate::builtins::touch;
-use crate::builtins::write;
+use crate::builtins::*;
 
 pub fn dispatch(args: &[String], history: &Vec<String>) -> Result<bool, String> {
     match args[0].as_str() {
@@ -20,7 +9,7 @@ pub fn dispatch(args: &[String], history: &Vec<String>) -> Result<bool, String> 
     echo [text]
     cd [path]
     pwd
-    ls [-l] [-a] [-F] [path]
+    ls [-a] [-F] [-l] [-r] [-R] [path]
     cat <file>
     cp <src> <dst>
     rm [-r] <path>
