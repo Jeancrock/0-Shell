@@ -31,7 +31,7 @@
 ## Installation & Lancement
 
 `./install.sh`
-`./0-Shell.sh`
+`./0-shell.sh`
 
 ## Prompt
 
