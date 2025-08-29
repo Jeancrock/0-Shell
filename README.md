@@ -6,7 +6,7 @@
 
 ## Fonctionnalités principales
 
-* Prompt dynamique : `username@hostname:cwd$`
+* Prompt dynamique : `◯ (0-Shell) username@hostname:cwd$`
 * Historique des commandes
 * Couleurs ANSI pour différencier dossiers, fichiers et exécutables
 * Commandes intégrées :
@@ -38,9 +38,10 @@
 Le prompt est dynamique et affiché sous la forme :
 
 ```
-username@hostname:cwd$
+◯ (0-Shell) username@hostname:cwd$
 ```
 
+* `◯ (0-Shell)` : Indisque que vous êtes dans le programme 0-shell
 * `username` : nom de l’utilisateur courant
 * `hostname` : nom de la machine
 * `cwd` : répertoire courant (le home est remplacé par `~`)
