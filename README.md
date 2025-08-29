@@ -28,9 +28,10 @@
 | `history`                        | Affiche l’historique des commandes                   |
 ---
 
-## Installation
+## Installation & Lancement
 
 `./install.sh`
+`./0-Shell.sh`
 
 ## Prompt
 
